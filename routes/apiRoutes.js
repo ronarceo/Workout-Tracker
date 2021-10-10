@@ -20,6 +20,14 @@ router.get("/api/workouts", (req, res) => {
 
 router.get("/api/workouts/range", (req, res) => {
     db.Workout.find({}).then((workouts) => {
+        workouts.forEach(workouts => {
+            let totalDuration = 0;
+            workouts.exercises.forEach(e => {
+                totalDuration += e.duration;
+            });
+            workouts.totalDuration = totalDuration;
+
+        });
         res.json(workouts);
     }).catch(err => {
         res.status(400).json(err);
