@@ -19,7 +19,8 @@ router.get("/api/workouts", (req, res) => {
 })
 
 router.get("/api/workouts/range", (req, res) => {
-    db.Workout.find({}).then((workouts) => {
+    db.Workout.find({}).limit(7).sort({ day: -1})
+    .then((workouts) => {
         workouts.forEach(workouts => {
             let totalDuration = 0;
             workouts.exercises.forEach(e => {
@@ -28,7 +29,7 @@ router.get("/api/workouts/range", (req, res) => {
             workouts.totalDuration = totalDuration;
 
         });
-        res.json(workouts);
+        res.json(workouts.reverse());
     }).catch(err => {
         res.status(400).json(err);
     });
