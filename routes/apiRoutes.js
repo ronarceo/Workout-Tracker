@@ -2,33 +2,31 @@ const router = require("express").Router();
 const db = require("../models");
 
 router.get("/api/workouts", (req, res) => {
-    db.Workout.find({}).then(workouts => {
-        workouts.forEach(workouts => {
-            let totalDuration = 0;
-            workouts.exercises.forEach(e => {
-                totalDuration += e.duration;
-            });
-            workouts.totalDuration = totalDuration;
-
-        });
-        res.json(workouts);
-    })
+    db.Workout.aggregate([
+        {
+            $addFields: {
+                totalDuration: { $sum: `$exercises.duration` }
+            }
+        }
+    ])
+        .then(workouts => {
+            res.json(workouts);
+        })
         .catch(err => {
             res.status(400).json(err);
         });
 })
 
 router.get("/api/workouts/range", (req, res) => {
-    db.Workout.find({}).limit(7).sort({ day: -1 })
+    db.Workout.aggregate([
+        {
+            $addFields: {
+                totalDuration: { $sum: `$exercises.duration` }
+            }
+        }
+    ])
+        .sort({ day: -1 }).limit(7)
         .then((workouts) => {
-            workouts.forEach(workouts => {
-                let totalDuration = 0;
-                workouts.exercises.forEach(e => {
-                    totalDuration += e.duration;
-                });
-                workouts.totalDuration = totalDuration;
-
-            });
             res.json(workouts.reverse());
         }).catch(err => {
             res.status(400).json(err);
